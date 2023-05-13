@@ -1,0 +1,5 @@
+realms_client_directory = "C:\\Users\\drewc\\AppData\\Local\\Toontown Realms\\"
+dont_update_temp_files = true
+keep_temp_files = true
+use_dev_resources = true
+dev_directory = "S:\\Development\\TTOffline"
