@@ -14,6 +14,7 @@ from panda3d.core import *
 from direct.showbase.ShowBase import *
 from direct.showbase import ShowBaseGlobal
 from direct.directtools.DirectGlobals import *
+from wx.lib.agw.knobctrl import KnobCtrl, EVT_KC_ANGLE_CHANGED, KnobCtrlEvent
 from wx.lib.agw.ribbon import RibbonBar, RibbonPage
 from wx.lib.scrolledpanel import ScrolledPanel
 
@@ -22,6 +23,7 @@ from .ViewPort import *
 from src.base import DPDKGlobal
 from ..datapack.DataPackManager import DataPackManager
 from ..pandaview.Cog import Cog
+from ..widgets.PackItem import PackItem
 from ..widgets.HeadItem import HeadItem
 
 ID_FOUR_VIEW = 401
@@ -49,8 +51,9 @@ class WxPandaShell(WxAppShell):
     }
 
     def __init__(self):
-        # Create the Wx app
+        self.packListItems: List[PackItem] = []
         self.headItems: List[HeadItem] = []
+
         WxAppShell.__init__(self, size = wx.Size(self.frameWidth, self.frameHeight))
 
         self.initialize()
@@ -88,12 +91,44 @@ class WxPandaShell(WxAppShell):
         availPacksLabel.SetFont(self.uiFontLarge)
         layout.Add(availPacksLabel)
 
+        self.availPacksList = ScrolledPanel(self.homeFrame, size = (500, 500))
+
+        self.availPackLayout = wx.BoxSizer(wx.VERTICAL)
+
+        self.availPacksList.SetSizer(self.availPackLayout)
+        self.availPacksList.SetupScrolling()
+        layout.Add(self.availPacksList)
         self.newPackNameBox = wx.TextCtrl(self.homeFrame, size = (200, 20))
         layout.Add(self.newPackNameBox)
 
         newPackButton = wx.Button(self.homeFrame, label = 'New Pack')
         newPackButton.Bind(wx.EVT_BUTTON, self.loadPack)
         layout.Add(newPackButton)
+        self.updatePackList()
+
+    def updatePackList(self):
+        for pack in self.packListItems:
+            pack.delete()
+        self.packListItems = []
+
+        if not os.path.exists('sdk/packs'):
+            os.mkdir('sdk/packs')
+
+        for folder in os.listdir('sdk/packs'):
+            if os.path.exists(f'sdk/packs/{folder}/pack.json'):
+                self.packListItems.append(PackItem(
+                    packFolder = folder,
+                    parent = self.availPacksList,
+                    sdkInterface = self
+                ))
+
+        self.refreshPackList()
+
+    def refreshPackList(self):
+        self.availPackLayout.Clear()
+        for pack in self.packListItems:
+            self.availPackLayout.Add(pack)
+        self.availPacksList.SetupScrolling()
 
     def loadPack(self, _):
         for i in range(self.tabFrame.GetPageCount()):
@@ -183,6 +218,14 @@ class WxPandaShell(WxAppShell):
         self.bodyColorPicker = CubeColourDialog(self.cogEditorTabBody)
         self.bodyColorButton.Bind(wx.EVT_BUTTON, self.chooseBodyColor)
 
+        previewRotationLabel = wx.StaticText(self.cogEditorTabBody, label = 'Preview Rotation')
+        previewRotationLabel.SetFont(self.uiFontNormal)
+        self.previewRotationSlider = KnobCtrl(self.cogEditorTabBody, size = (200, 200))
+        self.previewRotationSlider.Bind(EVT_KC_ANGLE_CHANGED, self.__rotatePreview)
+        self.previewRotationSlider.SetAngularRange(0, 360)
+        self.previewRotationSlider.SetTags((0, 360))
+        self.previewRotationSlider.SetValue(180)
+
         self.bodyLayout.AddMany(
             (bodyTypeLabel,
              self.bodyTypeSelection,
@@ -201,7 +244,9 @@ class WxPandaShell(WxAppShell):
              self.handColorCurrent,
              bodyColorLabel,
              self.bodyColorButton,
-             self.bodyColorCurrent
+             self.bodyColorCurrent,
+             previewRotationLabel,
+             self.previewRotationSlider
              ))
 
         self.cogEditorTabBody.SetSizer(self.bodyLayout)
@@ -265,6 +310,9 @@ class WxPandaShell(WxAppShell):
         self.cogEditorRight.AddPage(self.cogEditorTabList, "Cogs")
 
         # self.loadCog()
+
+    def __rotatePreview(self, e: KnobCtrlEvent):
+        self.cogPreview.setH(e.GetValue())
 
     def __setHandColor(self, r, g, b, a):
         self.handColorCurrent.SetLabel(f'({r}, {g}, {b}, {a})')

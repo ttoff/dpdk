@@ -1,6 +1,7 @@
 # Realms SDK
 settings.toml
 sdk/temp/*
+sdk/packs/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

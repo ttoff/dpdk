@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/RealmsDPDK.iml" filepath="$PROJECT_DIR$/.idea/RealmsDPDK.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/RealmsSDK.iml" filepath="$PROJECT_DIR$/.idea/RealmsSDK.iml" />
       <module fileurl="file://$PROJECT_DIR$/../../../TTOffline/.idea/TTOffline.iml" filepath="$PROJECT_DIR$/../../../TTOffline/.idea/TTOffline.iml" />
     </modules>
   </component>

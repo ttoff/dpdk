@@ -1,21 +1,16 @@
-from os.path import abspath
-
-import asyncio
 import aiohttp
+import asyncio
+import glob
 import os
 import shutil
 import sys
-import glob
-from pathlib import PurePosixPath
-
 import wx
-
 from direct.directnotify.DirectNotifyGlobal import directNotify
 from direct.showbase.ShowBase import ShowBase
 from panda3d.core import Multifile, Filename, loadPrcFile, loadPrcFileData, TextProperties, TextPropertiesManager
+from pathlib import PurePosixPath
 from typing import Dict
 from wx.adv import SplashScreen, SPLASH_CENTER_ON_SCREEN
-from wx.lib.agw.advancedsplash import AdvancedSplash, AS_TIMEOUT, AS_CENTER_ON_PARENT, AS_SHADOW_BITMAP, AS_CENTER_ON_SCREEN
 
 from src.base import DPDKGlobal
 from src.ott.Settings import Settings
@@ -166,7 +161,7 @@ class DPDKBase(WxPandaShell):
             self.localizer['#' + key] = val
 
     def setupTextProperties(self):
-        tpm = TextPropertiesManager.getGlobalPtr()
+        tpm: TextPropertiesManager = TextPropertiesManager.getGlobalPtr()
         candidateActive = TextProperties()
         candidateActive.setTextColor(0, 0, 1, 1)
         tpm.setProperties('candidate_active', candidateActive)
