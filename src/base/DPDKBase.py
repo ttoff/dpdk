@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import aiohttp
 import asyncio
 import glob
@@ -29,7 +31,7 @@ class DPDKBase(WxPandaShell):
         # a much simpler way to hold localizer keys and strings
         self.localizer: Dict[str, str] = {}
         self.gameResourcesPath: str = 'sdk/temp/realms_resources'
-        self.activePack = None
+        self.activePack: str | None = None
         self.settings = Settings('settings.toml')
         self.wxApp = wx.App(redirect = False)
         self.wxApp.SetAppName("Toontown Realms Data Pack Development Kit")

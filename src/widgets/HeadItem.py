@@ -16,7 +16,7 @@ from src.base.ToontownTypes import TCogHead
 class HeadItem(wx.Panel):
 
     def __init__(self, parent: Window, sdkInterface, id: int = wx.ID_ANY, name: str = "Head"):
-        super().__init__(parent, id, wx.DefaultPosition, (400, 230), wx.BORDER_THEME, name = name)
+        super().__init__(parent, id, wx.DefaultPosition, parent.FromDIP(wx.Size((400, 230))), wx.BORDER_THEME, name = name)
 
         self.layout = wx.BoxSizer(wx.VERTICAL)
         self.sdkInterface = sdkInterface
@@ -30,7 +30,7 @@ class HeadItem(wx.Panel):
         self.scale: VBase3F = Vec3(1, 1, 1)
         self.colorScale: VBase4F = Vec4(1, 1, 1, 1)
 
-        deleteButton = wx.Button(self, label = 'X', pos = (380, 0), size = (15, 15))
+        deleteButton = wx.Button(self, label = 'X', pos = self.FromDIP(wx.Point(380, 0)), size = self.FromDIP(wx.Size((15, 15))))
         deleteButton.Bind(wx.EVT_BUTTON, self.delete)
 
         pathEntryLabel = wx.StaticText(
@@ -38,7 +38,7 @@ class HeadItem(wx.Panel):
         )
         self.pathEntry = wx.FilePickerCtrl(
             self,
-            size = (400, 25),
+            size = self.FromDIP(wx.Size((400, 25))),
             wildcard = "Realms Model Files (*.bam)|*.bam",
             message = "Select a model file"
         )
@@ -50,7 +50,7 @@ class HeadItem(wx.Panel):
         )
 
         self.nodeEntry = wx.TextCtrl(
-            self, size = (400, 25),
+            self, size = self.FromDIP(wx.Size((400, 25))),
         )
         self.nodeEntry.Bind(wx.EVT_TEXT, self.__setNode)
 
@@ -59,7 +59,7 @@ class HeadItem(wx.Panel):
         )
         self.textureEntry = wx.FilePickerCtrl(
             self,
-            size = (400, 25),
+            size = self.FromDIP(wx.Size((400, 25))),
             wildcard = "Realms Texture Files (*.png)|*.png",
             message = "Select a texture file"
         )
@@ -69,15 +69,15 @@ class HeadItem(wx.Panel):
         self.posBox = wx.Panel(self)
         posBoxLayout = wx.BoxSizer(wx.HORIZONTAL)
 
-        posLabel = wx.StaticText(self.posBox, size = (100, 25), label = 'Position')
+        posLabel = wx.StaticText(self.posBox, size = self.FromDIP(wx.Size(100, 25)), label = 'Position')
 
-        self.posX = FloatSpin(self.posBox, size = (100, 25), min_val = -200, max_val = 200, increment = 0.01, value = 0.0, digits = 8)
+        self.posX = FloatSpin(self.posBox, size = self.FromDIP(wx.Size(100, 25)), min_val = -200, max_val = 200, increment = 0.01, value = 0.0, digits = 8)
         self.posX.Bind(wx.EVT_SPINCTRL, self.__setPosX)
 
-        self.posY = FloatSpin(self.posBox, size = (100, 25), min_val = -200, max_val = 200, increment = 0.01, value = 0.0, digits = 8)
+        self.posY = FloatSpin(self.posBox, size = self.FromDIP(wx.Size(100, 25)), min_val = -200, max_val = 200, increment = 0.01, value = 0.0, digits = 8)
         self.posY.Bind(wx.EVT_SPINCTRL, self.__setPosY)
 
-        self.posZ = FloatSpin(self.posBox, size = (100, 25), min_val = -200, max_val = 200, increment = 0.01, value = 0.0, digits = 8)
+        self.posZ = FloatSpin(self.posBox, size = self.FromDIP(wx.Size(100, 25)), min_val = -200, max_val = 200, increment = 0.01, value = 0.0, digits = 8)
         self.posZ.Bind(wx.EVT_SPINCTRL, self.__setPosZ)
 
         posBoxLayout.AddMany((
@@ -91,14 +91,14 @@ class HeadItem(wx.Panel):
         self.hprBox = wx.Panel(self)
         hprBoxLayout = wx.BoxSizer(wx.HORIZONTAL)
 
-        hprLabel = wx.StaticText(self.hprBox, size = (100, 25), label = 'Rotation')
-        self.h = FloatSpin(self.hprBox, size = (100, 25), min_val = -360, max_val = 360, increment = 1, value = 0.0, digits = 3)
+        hprLabel = wx.StaticText(self.hprBox, size = self.FromDIP(wx.Size(100, 25)), label = 'Rotation')
+        self.h = FloatSpin(self.hprBox, size = self.FromDIP(wx.Size(100, 25)), min_val = -360, max_val = 360, increment = 1, value = 0.0, digits = 3)
         self.h.Bind(wx.EVT_SPINCTRL, self.__setH)
 
-        self.p = FloatSpin(self.hprBox, size = (100, 25), min_val = -360, max_val = 360, increment = 1, value = 0.0, digits = 3)
+        self.p = FloatSpin(self.hprBox, size = self.FromDIP(wx.Size(100, 25)), min_val = -360, max_val = 360, increment = 1, value = 0.0, digits = 3)
         self.p.Bind(wx.EVT_SPINCTRL, self.__setP)
 
-        self.r = FloatSpin(self.hprBox, size = (100, 25), min_val = -360, max_val = 360, increment = 1, value = 0.0, digits = 3)
+        self.r = FloatSpin(self.hprBox, size = self.FromDIP(wx.Size(100, 25)), min_val = -360, max_val = 360, increment = 1, value = 0.0, digits = 3)
         self.r.Bind(wx.EVT_SPINCTRL, self.__setR)
 
         hprBoxLayout.AddMany((
@@ -112,14 +112,14 @@ class HeadItem(wx.Panel):
         self.scaleBox = wx.Panel(self)
         scaleBoxLayout = wx.BoxSizer(wx.HORIZONTAL)
 
-        scaleLabel = wx.StaticText(self.scaleBox, size = (100, 25), label = 'Scale')
-        self.sx = FloatSpin(self.scaleBox, size = (100, 25), min_val = -100, max_val = 100, increment = 0.01, value = 1.0, digits = 4)
+        scaleLabel = wx.StaticText(self.scaleBox, size = self.FromDIP(wx.Size(100, 25)), label = 'Scale')
+        self.sx = FloatSpin(self.scaleBox, size = self.FromDIP(wx.Size(100, 25)), min_val = -100, max_val = 100, increment = 0.01, value = 1.0, digits = 4)
         self.sx.Bind(wx.EVT_SPINCTRL, self.__setScaleX)
 
-        self.sy = FloatSpin(self.scaleBox, size = (100, 25), min_val = -100, max_val = 100, increment = 0.01, value = 1.0, digits = 4)
+        self.sy = FloatSpin(self.scaleBox, size = self.FromDIP(wx.Size(100, 25)), min_val = -100, max_val = 100, increment = 0.01, value = 1.0, digits = 4)
         self.sy.Bind(wx.EVT_SPINCTRL, self.__setScaleY)
 
-        self.sz = FloatSpin(self.scaleBox, size = (100, 25), min_val = -100, max_val = 100, increment = 0.01, value = 1.0, digits = 4)
+        self.sz = FloatSpin(self.scaleBox, size = self.FromDIP(wx.Size(100, 25)), min_val = -100, max_val = 100, increment = 0.01, value = 1.0, digits = 4)
         self.sz.Bind(wx.EVT_SPINCTRL, self.__setScaleZ)
 
         scaleBoxLayout.AddMany((
@@ -133,9 +133,9 @@ class HeadItem(wx.Panel):
         self.colorBox = wx.Panel(self)
         colorBoxLayout = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.colorLabel = wx.StaticText(self.colorBox, size = (300, 25), label = 'Color (1.0, 1.0, 1.0, 1.0)')
+        self.colorLabel = wx.StaticText(self.colorBox, size = self.FromDIP(wx.Size(300, 25)), label = 'Color (1.0, 1.0, 1.0, 1.0)')
         self.colorPicker = CubeColourDialog(self.colorBox)
-        colorButton = wx.Button(self.colorBox, label = 'Choose Color', size = (100, 25))
+        colorButton = wx.Button(self.colorBox, label = 'Choose Color', size = self.FromDIP(wx.Size(100, 25)))
         colorButton.Bind(wx.EVT_BUTTON, self.__openColorPicker)
 
         colorBoxLayout.AddMany((
@@ -245,7 +245,7 @@ class HeadItem(wx.Panel):
         self.colorLabel.SetLabel(f'Color ({r:.06f}, {g:.06f}, {b:.06f}, {a:.06f})')
         self.colorScale = Vec4(r, g, b, a)
 
-    def delete(self, _):
+    def delete(self, _ = None):
         self.sdkInterface.headItems.remove(self)
         self.sdkInterface.updateHeads(_)
         self.sdkInterface.refreshHeadList()

@@ -1,3 +1,5 @@
+import shutil
+
 import glob
 import json
 import os
@@ -23,6 +25,7 @@ from .ViewPort import *
 from src.base import DPDKGlobal
 from ..datapack.DataPackManager import DataPackManager
 from ..pandaview.Cog import Cog
+from ..widgets.CogOverrideItem import CogOverrideItem
 from ..widgets.PackItem import PackItem
 from ..widgets.HeadItem import HeadItem
 
@@ -53,8 +56,11 @@ class WxPandaShell(WxAppShell):
     def __init__(self):
         self.packListItems: List[PackItem] = []
         self.headItems: List[HeadItem] = []
+        self.cogOverrideItems: List[CogOverrideItem] = []
 
         WxAppShell.__init__(self, size = wx.Size(self.frameWidth, self.frameHeight))
+
+        self.Size = self.FromDIP(wx.Size(self.frameWidth, self.frameHeight))
 
         self.initialize()
 
@@ -91,14 +97,15 @@ class WxPandaShell(WxAppShell):
         availPacksLabel.SetFont(self.uiFontLarge)
         layout.Add(availPacksLabel)
 
-        self.availPacksList = ScrolledPanel(self.homeFrame, size = (500, 500))
+        self.availPacksList = ScrolledPanel(self.homeFrame, size = self.FromDIP(wx.Size(500, 500)))
 
         self.availPackLayout = wx.BoxSizer(wx.VERTICAL)
 
         self.availPacksList.SetSizer(self.availPackLayout)
         self.availPacksList.SetupScrolling()
+
         layout.Add(self.availPacksList)
-        self.newPackNameBox = wx.TextCtrl(self.homeFrame, size = (200, 20))
+        self.newPackNameBox = wx.TextCtrl(self.homeFrame, size = self.FromDIP(wx.Size((200, 20))))
         layout.Add(self.newPackNameBox)
 
         newPackButton = wx.Button(self.homeFrame, label = 'New Pack')
@@ -130,10 +137,15 @@ class WxPandaShell(WxAppShell):
             self.availPackLayout.Add(pack)
         self.availPacksList.SetupScrolling()
 
+    def openPack(self, packPath: str):
+        DPDKGlobal.DKBase.activePack = packPath
+        self.loadPack(None)
+
     def loadPack(self, _):
         for i in range(self.tabFrame.GetPageCount()):
             self.tabFrame.RemovePage(0)
         self.tabFrame.AddPage(self.cogEditorFrame, "Cog Appearances")
+        self.updateOverrides()
 
         self.tabFrame.AddPage(self.settingsPage, "Settings")
 
@@ -166,18 +178,18 @@ class WxPandaShell(WxAppShell):
 
         bodyScaleLabel = wx.StaticText(self.cogEditorTabBody, label = "Scale")
         bodyScaleLabel.SetFont(self.uiFontNormal)
-        self.bodyScale = FloatSpin(self.cogEditorTabBody, size = (400, 25), min_val = 0.1, max_val = 4.0, increment = 0.01, value = 1.0, digits = 8)
+        self.bodyScale = FloatSpin(self.cogEditorTabBody, size = self.FromDIP(wx.Size((400, 25))), min_val = 0.1, max_val = 4.0, increment = 0.01, value = 1.0, digits = 8)
         self.bodyScale.Bind(wx.EVT_SPINCTRL, self.setBodySize)
 
         heightLabel = wx.StaticText(self.cogEditorTabBody, label = 'Nametag Height')
         heightLabel.SetFont(self.uiFontNormal)
-        self.heightSpin = FloatSpin(self.cogEditorTabBody, size = (400, 25), min_val = 0.1, max_val = 15, increment = 0.1, value = 9.0, digits = 8)
+        self.heightSpin = FloatSpin(self.cogEditorTabBody, size = self.FromDIP(wx.Size((400, 25))), min_val = 0.1, max_val = 15, increment = 0.1, value = 9.0, digits = 8)
         self.heightSpin.Bind(wx.EVT_SPINCTRL, self.setHeight)
 
         torsoTexLabel = wx.StaticText(self.cogEditorTabBody, label = "Torso Texture")
         torsoTexLabel.SetFont(self.uiFontNormal)
         self.torsoTex = wx.FilePickerCtrl(self.cogEditorTabBody,
-                                          size = (400, 25),
+                                          size = self.FromDIP(wx.Size((400, 25))),
                                           path = self.cogPreview.torsoTex,
                                           wildcard = "Realms Texture Files (*.png)|*.png",
                                           message = "Select a Torso Texture")
@@ -187,7 +199,7 @@ class WxPandaShell(WxAppShell):
         armTexLabel = wx.StaticText(self.cogEditorTabBody, label = "Arm Texture")
         armTexLabel.SetFont(self.uiFontNormal)
         self.armTex = wx.FilePickerCtrl(self.cogEditorTabBody,
-                                        size = (400, 25),
+                                        size = self.FromDIP(wx.Size((400, 25))),
                                         path = self.cogPreview.armTex,
                                         wildcard = "Realms Texture Files (*.png)|*.png",
                                         message = "Select an Arm Texture")
@@ -197,7 +209,7 @@ class WxPandaShell(WxAppShell):
         legTexLabel = wx.StaticText(self.cogEditorTabBody, label = "Leg Texture")
         legTexLabel.SetFont(self.uiFontNormal)
         self.legTex = wx.FilePickerCtrl(self.cogEditorTabBody,
-                                        size = (400, 25),
+                                        size = self.FromDIP(wx.Size((400, 25))),
                                         path = self.cogPreview.legTex,
                                         wildcard = "Realms Texture Files (*.png)|*.png",
                                         message = "Select a Leg Texture")
@@ -251,7 +263,7 @@ class WxPandaShell(WxAppShell):
 
         self.cogEditorTabBody.SetSizer(self.bodyLayout)
         # == HEAD TAB ==
-        self.cogEditorTabHead = wx.Panel(self.cogEditorRight, size = (400, 900))
+        self.cogEditorTabHead = wx.Panel(self.cogEditorRight, size = self.FromDIP(wx.Size(400, 900)))
         headLay = wx.BoxSizer(wx.VERTICAL)
 
         self.bottomBar = wx.Panel(self.cogEditorTabHead)
@@ -263,7 +275,7 @@ class WxPandaShell(WxAppShell):
         bottomBarLayout.AddMany((applyButton, newButton))
         self.bottomBar.SetSizer(bottomBarLayout)
 
-        self.cogHeadList = ScrolledPanel(self.cogEditorTabHead, size = (420, 900))
+        self.cogHeadList = ScrolledPanel(self.cogEditorTabHead, size = self.FromDIP(wx.Size(420, 900)))
 
         self.headLayout = wx.BoxSizer(wx.VERTICAL)
 
@@ -280,13 +292,18 @@ class WxPandaShell(WxAppShell):
         infoLayout = wx.BoxSizer(wx.VERTICAL)
 
         self.nameLabel = wx.StaticText(self.cogEditorTabInfo, label = f'Name: "{DataPackManager.getLocalizedText(self.cogPreview.name)}"')
-        self.nameInput = wx.TextCtrl(self.cogEditorTabInfo, size = (400, 25))
+        self.nameInput = wx.TextCtrl(self.cogEditorTabInfo, size = self.FromDIP(wx.Size(400, 25)))
         self.nameInput.Bind(wx.EVT_TEXT, self.__updateNames)
+
+        self.exitCogButton = wx.Button(
+            self.cogEditorTabInfo, label = 'Back to Cog list'
+        )
+        self.exitCogButton.Bind(wx.EVT_BUTTON, self.unloadCog)
 
         infoLayout.AddMany((
             self.nameLabel,
-            self.nameInput
-
+            self.nameInput,
+            self.exitCogButton
         ))
         self.cogEditorTabInfo.SetSizer(infoLayout)
 
@@ -301,6 +318,15 @@ class WxPandaShell(WxAppShell):
         tempLoad.Bind(wx.EVT_BUTTON, self.chooseNewOverride)
         listLayout.Add(tempLoad)
 
+        self.cogOverridesList = ScrolledPanel(self.cogEditorTabList, size = self.FromDIP(wx.Size(300, 500)))
+
+        self.cogOverridesLayout = wx.BoxSizer(wx.VERTICAL)
+
+        self.cogOverridesList.SetSizer(self.cogOverridesLayout)
+        self.cogOverridesList.SetupScrolling()
+
+        listLayout.Add(self.cogOverridesList)
+
         self.cogEditorTabBody.Hide()
         self.cogEditorTabHead.Hide()
         self.cogEditorTabInfo.Hide()
@@ -311,12 +337,42 @@ class WxPandaShell(WxAppShell):
 
         # self.loadCog()
 
+    def updateOverrides(self):
+        for cog in self.cogOverrideItems:
+            cog.Destroy()
+        self.cogOverrideItems = []
+
+        self.cogOverridesLayout.Clear()
+
+        if not os.path.exists(f'sdk/packs/{DPDKGlobal.DKBase.activePack}/cogs/'):
+            os.mkdir(f'sdk/packs/{DPDKGlobal.DKBase.activePack}/cogs/')
+
+        if not os.path.exists(f'sdk/packs/{DPDKGlobal.DKBase.activePack}/cogs/appearance/'):
+            os.mkdir(f'sdk/packs/{DPDKGlobal.DKBase.activePack}/cogs/appearance/')
+
+        for file in os.listdir(f'sdk/packs/{DPDKGlobal.DKBase.activePack}/cogs/appearance/'):
+            if os.path.exists(f'sdk/packs/{DPDKGlobal.DKBase.activePack}/cogs/appearance/{file}'):
+                self.cogOverrideItems.append(CogOverrideItem(
+                    overrideName = file,
+                    parent = self.cogOverridesList,
+                    sdkInterface = self
+                ))
+
+        self.refreshOverrides()
+
+    def refreshOverrides(self):
+        self.cogOverridesLayout.Clear()
+        for cog in self.cogOverrideItems:
+            self.cogOverridesLayout.Add(cog)
+        self.cogOverridesList.SetupScrolling()
+
     def __rotatePreview(self, e: KnobCtrlEvent):
         self.cogPreview.setH(e.GetValue())
 
     def __setHandColor(self, r, g, b, a):
         self.handColorCurrent.SetLabel(f'({r}, {g}, {b}, {a})')
         self.cogPreview.setHandColor(r, g, b, a)
+
     def chooseHandColor(self, _):
         if self.bodyColorPicker.ShowModal() == wx.ID_OK:
             colorData = self.bodyColorPicker.GetColourData()
@@ -359,8 +415,8 @@ class WxPandaShell(WxAppShell):
             js.get('path'),
             js.get('node', ''),
             js.get('texture', ''),
-            js.get('pos', (0, 0, 0)),
-            js.get('hpr', (0, 0, 0)),
+            js.get('position', (0, 0, 0)),
+            js.get('rotation', (0, 0, 0)),
             js.get('scale', (1, 1, 1)),
             js.get('color_scale', (1, 1, 1, 1)),
             js.get('remove_nodes', [])
@@ -419,12 +475,14 @@ class WxPandaShell(WxAppShell):
         self.cogEditorRight.AddPage(self.cogEditorTabHead, "Heads")
         self.cogEditorRight.AddPage(self.cogEditorTabInfo, "Info")
 
-    def unloadCog(self):
+    def unloadCog(self, _ = None):
         self.cogPreview.hide()
+        self.cogPreview.activeCogFile = None
         self.cogEditorRight.RemovePage(0)
-        self.cogEditorRight.RemovePage(1)
-        self.cogEditorRight.RemovePage(2)
+        self.cogEditorRight.RemovePage(0)
+        self.cogEditorRight.RemovePage(0)
         self.cogEditorRight.AddPage(self.cogEditorTabList, "Cogs")
+        self.updateOverrides()
 
     def __updateNames(self, _):
         name = self.nameInput.GetValue()
@@ -445,9 +503,12 @@ class WxPandaShell(WxAppShell):
 
             if dialog.ShowModal() == wx.ID_OK:
                 path = filePaths[dialog.GetSelection()]
-                self.__loadCog(path)
+                filename = os.path.basename(path)
+                shutil.copy(path, f'sdk/packs/{DPDKGlobal.DKBase.activePack}/cogs/appearance/{filename}')
+                self.loadCogFile(f'sdk/packs/{DPDKGlobal.DKBase.activePack}/cogs/appearance/{filename}')
 
-    def __loadCog(self, filePath: str):
+    def loadCogFile(self, filePath: str):
+        self.cogPreview.activeCogFile = None
         self.cogPreview.clearHeads()
         self.headLayout.Clear()
         for head in self.headItems:
@@ -485,8 +546,12 @@ class WxPandaShell(WxAppShell):
             self.nameInput.SetValue(js.get('name'))
             self.__updateNames(None)
 
+            self.cogPreview.setSkeleton(js.get('is_skeleton', False))
+            self.cogPreview.setQuoteSets(js.get('quote_sets', []))
+
         self.loadCog(None)
         self.updateHeads(None)
+        self.cogPreview.activeCogFile = filePath
 
     def setupSettingsPage(self):
         # === Settings Page ===
@@ -499,7 +564,7 @@ class WxPandaShell(WxAppShell):
         settingGameInstallLabel = wx.StaticText(self.settingsPage, label = "Toontown Realms Installation Directory")
         settingGameInstallLabel.SetFont(self.uiFontNormal)
         self.settingsGameInstall = wx.FilePickerCtrl(
-            self.settingsPage, size = (400, 20),
+            self.settingsPage, size = self.FromDIP(wx.Size(400, 20)),
             path = DPDKGlobal.DKBase.settings.get('realms_client_directory', ''),
             message = "TT Realms Installation Directory")
         # add everything to layout

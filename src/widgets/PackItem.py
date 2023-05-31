@@ -13,7 +13,7 @@ from src.base import DPDKGlobal
 class PackItem(wx.Panel):
 
     def __init__(self, packFolder: str, parent: Window, sdkInterface, id: int = wx.ID_ANY, name: str = "packitem"):
-        super().__init__(parent, id, wx.DefaultPosition, (480, 40), wx.BORDER_THEME, name = name)
+        super().__init__(parent, id, wx.DefaultPosition, parent.FromDIP(wx.Size((480, 40))), wx.BORDER_THEME, name = name)
 
         self.layout = wx.BoxSizer(wx.VERTICAL)
         self.sdkInterface = sdkInterface
@@ -31,7 +31,7 @@ class PackItem(wx.Panel):
                 self, label = f'/{packFolder}'
             )
 
-            choosePackButton = wx.Button(self, label = 'Open', pos = (380, 5))
+            choosePackButton = wx.Button(self, label = 'Open', pos = self.FromDIP(wx.Point(380, 5)))
             choosePackButton.Bind(wx.EVT_BUTTON, self.loadPack)
 
             self.layout.AddMany((
@@ -42,13 +42,13 @@ class PackItem(wx.Panel):
         except:
             DPDKGlobal.DKBase.notify.warning(f'There was an error loading pack information for /{packFolder}.'
                                              f'Make sure pack.json exists and is formatted correctly.')
-            self.delete(_)
+            self.delete()
             return
 
     def loadPack(self, _):
-        return
+        self.sdkInterface.openPack(self.packFolder)
 
-    def delete(self, _):
+    def delete(self, _ = None):
         self.sdkInterface.packListItems.remove(self)
         self.sdkInterface.refreshPackList()
         self.Destroy()

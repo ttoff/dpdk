@@ -1,8 +1,13 @@
+from __future__ import annotations
+
+import json
+
 from typing import List, Dict
 
 from direct.actor.Actor import Actor
 from panda3d.core import PartBundle, Texture, NodePath, VBase4, TransparencyAttrib, TextNode, BillboardEffect, Vec3
 
+from src.base import DPDKGlobal
 from src.base.ToontownTypes import TCogHead
 from src.datapack.DataPackManager import DataPackManager
 
@@ -11,6 +16,12 @@ COG_MODELS = (
     'phase_3.5/models/char/suitB-mod.bam',
     'phase_3.5/models/char/suitC-mod.bam'
 )
+SKELECOG_MODELS = (
+    'phase_5/models/char/cogA_robot-zero.bam',
+    'phase_5/models/char/cogB_robot-zero.bam',
+    'phase_5/models/char/cogC_robot-zero.bam'
+)
+
 
 IDLE_ANIMS = (
     'phase_4/models/char/suitA-neutral.bam',
@@ -23,6 +34,9 @@ class Cog(Actor):
 
     def __init__(self):
         super().__init__(COG_MODELS[0], {'neutral': IDLE_ANIMS[0]})
+
+        self.activeCogFile: str | None = None
+
         self.loop('neutral')
         self.setTransparency(TransparencyAttrib.MDual)
 
@@ -48,6 +62,7 @@ class Cog(Actor):
 
         self.isSkeleton: bool = False
         self.isVirtual: bool = False
+        self.quoteSets: List[str] = []
         self.createNametag()
 
     def createNametag(self):
@@ -88,35 +103,40 @@ class Cog(Actor):
         texture = DataPackManager.getTexture(path)
         texture.setMinfilter(Texture.FTLinearMipmapLinear)
         self.find('**/torso').setTexture(texture, 1)
+        self.updateCog()
 
     def setArmTexture(self, path: str):
         self.armTex = path
         texture = DataPackManager.getTexture(path)
         texture.setMinfilter(Texture.FTLinearMipmapLinear)
         self.find('**/arms').setTexture(texture, 1)
+        self.updateCog()
 
     def setLegTexture(self, path: str):
         self.legTex = path
         texture = DataPackManager.getTexture(path)
         texture.setMinfilter(Texture.FTLinearMipmapLinear)
         self.find('**/legs').setTexture(texture, 1)
+        self.updateCog()
 
     def setBody(self, bType: int):
         self.bodyType = bType
         self.removePart('modelRoot')
-        self.loadModel(COG_MODELS[bType])
+        self.loadModel(SKELECOG_MODELS[bType] if self.isSkeleton else COG_MODELS[bType])
         self.loadAnims({'neutral': IDLE_ANIMS[bType]})
 
         self.loop('neutral')
 
-        self.setTorsoTexture(self.torsoTex)
-        self.setArmTexture(self.armTex)
-        self.setLegTexture(self.legTex)
+        if not self.isSkeleton:
+            self.setTorsoTexture(self.torsoTex)
+            self.setArmTexture(self.armTex)
+            self.setLegTexture(self.legTex)
+            self.find('**/hands').setColor(self.handColor)
         self.loadHeads()
 
-        self.find('**/hands').setColor(self.handColor)
         self.setColorScale(self.colorScale)
         self.adjustNametag()
+        self.updateCog()
 
     def addHead(self, head: TCogHead):
         self.heads.append(head)
@@ -128,38 +148,49 @@ class Cog(Actor):
             node.removeNode()
             del node
         self.headParts = []
+        self.updateCog()
 
     def changeColor(self, r, g, b, a):
         self.colorScale = VBase4(r, g, b, a)
         self.setColorScale(self.colorScale)
+        self.updateCog()
 
     def setHandColor(self, r, g, b, a):
         self.handColor = VBase4(r, g, b, a)
         self.find('**/hands').setColor(self.handColor)
+        self.updateCog()
 
     def setSize(self, scale: float):
         self.scale = scale
         self.getGeomNode().setScale(self.scale)
+        self.updateCog()
 
     def setHeight(self, height: float):
         self.height = height
         self.adjustNametag()
+        self.updateCog()
 
     def setName(self, name: str):
         self.name = name
         self.adjustNametag()
+        self.updateCog()
 
     def setNameSingular(self, name: str):
         self.nameS = name
+        self.updateCog()
 
     def setNamePlural(self, name: str):
         self.nameP = name
+        self.updateCog()
 
     def setVirtual(self, state: bool = False):
         self.isVirtual = state
+        self.updateCog()
 
     def setSkeleton(self, state: bool = False):
         self.isSkeleton = state
+        self.setBody(self.bodyType)
+        self.updateCog()
 
     def loadHeads(self):
         for node in self.headParts:
@@ -193,6 +224,12 @@ class Cog(Actor):
             self.headParts.append(headPart)
 
             _headModel.removeNode()
+        self.updateCog()
+
+    def setQuoteSets(self, sets: List[str] | None = None):
+        if sets is None:
+            sets = []
+        self.quoteSets = sets
 
     def toJson(self) -> Dict:
         jdict = {
@@ -206,10 +243,11 @@ class Cog(Actor):
             'name': self.name,
             'name_singular': self.nameS,
             'name_plural': self.nameP,
-            'hand_color': self.handColor,
-            'color_scale': self.colorScale,
+            'hand_color': [*self.handColor],
+            'color_scale': [*self.colorScale],
             'is_skeleton': self.isSkeleton,
-            'is_virtual': self.isVirtual
+            'is_virtual': self.isVirtual,
+            'quote_sets': self.quoteSets
         }
 
         for path, node, texture, pos, hpr, scale, colorScale, removeNodes in self.heads:
@@ -217,10 +255,17 @@ class Cog(Actor):
                 'path': path,
                 'node': node,
                 'texture': texture,
-                'pos': pos,
-                'hpr': hpr,
-                'scale': scale,
-                'color_scale': colorScale,
+                'position': [*pos],
+                'rotation': [*hpr],
+                'scale': [*scale],
+                'color_scale': [*colorScale],
                 'remove_nodes': removeNodes
             })
         return jdict
+
+    def updateCog(self):
+        if not self.activeCogFile:
+            return
+        DPDKGlobal.DKBase.notify.debug(self.toJson())
+        with open(self.activeCogFile, 'w') as file:
+            file.write(json.dumps(self.toJson(), indent = 4))
