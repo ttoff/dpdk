@@ -12,4 +12,4 @@ allow-incomplete-render true
 framebuffer-hardware true
 multisamples 8
 
-wx-frame-rate 165
+wx-frame-rate 30

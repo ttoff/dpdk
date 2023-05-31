@@ -8,6 +8,7 @@ from pathlib import PurePosixPath, Path
 from typing import List, Dict
 
 import wx
+from wx import CommandEvent
 from wx.lib.agw import fourwaysplitter as FWS
 from wx.lib.agw.cubecolourdialog import CubeColourDialog
 from wx.lib.agw.floatspin import FloatSpin
@@ -232,11 +233,16 @@ class WxPandaShell(WxAppShell):
 
         previewRotationLabel = wx.StaticText(self.cogEditorTabBody, label = 'Preview Rotation')
         previewRotationLabel.SetFont(self.uiFontNormal)
-        self.previewRotationSlider = KnobCtrl(self.cogEditorTabBody, size = (200, 200))
-        self.previewRotationSlider.Bind(EVT_KC_ANGLE_CHANGED, self.__rotatePreview)
-        self.previewRotationSlider.SetAngularRange(0, 360)
-        self.previewRotationSlider.SetTags((0, 360))
-        self.previewRotationSlider.SetValue(180)
+        #self.previewRotationSlider = KnobCtrl(self.cogEditorTabBody, size = (200, 200))
+        #self.previewRotationSlider.Bind(EVT_KC_ANGLE_CHANGED, self.__rotatePreview)
+        #self.previewRotationSlider.SetAngularRange(0, 360)
+        #self.previewRotationSlider.SetTags((0, 360))
+        #self.previewRotationSlider.SetValue(180)
+        self.previewRotationSlider = wx.Slider(self.cogEditorTabBody,
+                                               minValue = -180,
+                                               maxValue = 180,
+                                               size = self.FromDIP(wx.Size(200, 20)))
+        self.previewRotationSlider.Bind(wx.EVT_SLIDER, self.__rotatePreview)
 
         self.bodyLayout.AddMany(
             (bodyTypeLabel,
@@ -366,8 +372,8 @@ class WxPandaShell(WxAppShell):
             self.cogOverridesLayout.Add(cog)
         self.cogOverridesList.SetupScrolling()
 
-    def __rotatePreview(self, e: KnobCtrlEvent):
-        self.cogPreview.setH(e.GetValue())
+    def __rotatePreview(self, e: CommandEvent):
+        self.cogPreview.setH(180 + e.GetInt())
 
     def __setHandColor(self, r, g, b, a):
         self.handColorCurrent.SetLabel(f'({r}, {g}, {b}, {a})')
