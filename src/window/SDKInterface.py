@@ -59,7 +59,7 @@ class WxPandaShell(WxAppShell):
         self.headItems: List[HeadItem] = []
         self.cogOverrideItems: List[CogOverrideItem] = []
 
-        WxAppShell.__init__(self, size = wx.Size(self.frameWidth, self.frameHeight))
+        WxAppShell.__init__(self)
 
         self.Size = self.FromDIP(wx.Size(self.frameWidth, self.frameHeight))
 
@@ -375,7 +375,7 @@ class WxPandaShell(WxAppShell):
     def __rotatePreview(self, e: CommandEvent):
         self.cogPreview.setH(180 + e.GetInt())
 
-    def __setHandColor(self, r, g, b, a):
+    def __setHandColor(self, r: float, g: float, b: float, a: float):
         self.handColorCurrent.SetLabel(f'({r}, {g}, {b}, {a})')
         self.cogPreview.setHandColor(r, g, b, a)
 
@@ -386,7 +386,7 @@ class WxPandaShell(WxAppShell):
             r, g, b, a = color.Red() / 255., color.Green() / 255., color.Blue() / 255., color.Alpha() / 255.
             self.__setHandColor(r, g, b, a)
 
-    def __setBodyColor(self, r, g, b, a):
+    def __setBodyColor(self, r: float, g: float, b: float, a: float):
         self.bodyColorCurrent.SetLabel(f'({r}, {g}, {b}, {a})')
         self.cogPreview.changeColor(r, g, b, a)
 
@@ -524,6 +524,9 @@ class WxPandaShell(WxAppShell):
             js = json.load(cog)
             for head in js['head_models']:
                 self.addHead(head)
+
+            self.cogPreview.setSkeleton(js.get('is_skeleton', False))
+
             self.bodyTypeSelection.Select(js.get('body_type', 0))
             self.setBody(None)
             self.bodyScale.SetValue(js.get('scale', 1))
@@ -531,28 +534,28 @@ class WxPandaShell(WxAppShell):
             self.heightSpin.SetValue(js.get('height', 9))
             self.setHeight(None)
 
-            _torsoEvent = wx.FileDirPickerEvent()
-            _torsoEvent.SetPath(js.get('torso_texture', ''))
-            self.torsoTex.SetPath(js.get('torso_texture', ''))
-            self.setTorsoTex(_torsoEvent)
+            if not js.get('is_skeleton', False):
+                _torsoEvent = wx.FileDirPickerEvent()
+                _torsoEvent.SetPath(js.get('torso_texture', ''))
+                self.torsoTex.SetPath(js.get('torso_texture', ''))
+                self.setTorsoTex(_torsoEvent)
 
-            _armEvent = wx.FileDirPickerEvent()
-            _armEvent.SetPath(js.get('arm_texture', ''))
-            self.armTex.SetPath(js.get('arm_texture', ''))
-            self.setArmTex(_armEvent)
+                _armEvent = wx.FileDirPickerEvent()
+                _armEvent.SetPath(js.get('arm_texture', ''))
+                self.armTex.SetPath(js.get('arm_texture', ''))
+                self.setArmTex(_armEvent)
 
-            _legEvent = wx.FileDirPickerEvent()
-            _legEvent.SetPath(js.get('leg_texture', ''))
-            self.legTex.SetPath(js.get('leg_texture', ''))
-            self.setLegTex(_legEvent)
+                _legEvent = wx.FileDirPickerEvent()
+                _legEvent.SetPath(js.get('leg_texture', ''))
+                self.legTex.SetPath(js.get('leg_texture', ''))
+                self.setLegTex(_legEvent)
 
-            self.__setHandColor(*js.get('hand_color', (1, 1, 1, 1)))
+                self.__setHandColor(*js.get('hand_color', (1, 1, 1, 1)))
             self.__setBodyColor(*js.get('color_scale', (1, 1, 1, 1)))
 
             self.nameInput.SetValue(js.get('name'))
             self.__updateNames(None)
 
-            self.cogPreview.setSkeleton(js.get('is_skeleton', False))
             self.cogPreview.setQuoteSets(js.get('quote_sets', []))
 
         self.loadCog(None)
