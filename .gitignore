@@ -2,6 +2,7 @@
 settings.toml
 sdk/temp/*
 sdk/packs/*
+sdk/built/*
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,3 +1,5 @@
+import subprocess
+
 import shutil
 
 import glob
@@ -37,7 +39,7 @@ class WxPandaShell(WxAppShell):
     frameHeight = 720
     appversion = '1.0'
     appname = 'Toontown Realms Data Pack Development Kit'
-    copyright = ('Copyright 2023 Drewcification SW.' +
+    copyright = ('Copyright 2023 Toontown Realms.' +
                  '\nAll Rights Reserved.')
 
     def __init__(self):
@@ -62,6 +64,14 @@ This is ALPHA software. Be sure to make regular backups of your Data Pack files.
         self.uiFontNormal = wx.Font(12, family = wx.FONTFAMILY_DEFAULT, style = 0, weight = 90)
         self.tabFrame = wx.Notebook(self)
 
+        self.shareMenu = wx.Menu()
+        self.menuBar.Insert(1, self.shareMenu, "&Share")
+        self.compileButton: wx.MenuItem = wx.MenuItem(self.shareMenu, wx.ID_SAVE, text = 'Compile Pack', kind = wx.ITEM_NORMAL)
+        self.shareMenu.Append(self.compileButton)
+
+        self.Bind(wx.EVT_MENU, self.buildPack, self.compileButton)
+        self.compileButton.Enable(0)
+
         self.setupHomePage()
 
         self.setupCogEditorPage()
@@ -73,6 +83,26 @@ This is ALPHA software. Be sure to make regular backups of your Data Pack files.
         self.Layout()
         self.tabFrame.AddPage(self.homeFrame, "Home")
         self.tabFrame.AddPage(self.settingsPage, "Settings")
+
+    def buildPack(self, _ = None):
+        if not os.path.exists('sdk/built'):
+            os.makedirs('sdk/built')
+        mf: Multifile = Multifile()
+        mf.openWrite(f'sdk/built/{DPDKGlobal.DKBase.activePack}.rmdp')
+
+        files = glob.glob(f'sdk/packs/{DPDKGlobal.DKBase.activePack}/**/*.*', recursive = True)
+        for i in files:
+            i = i.replace("\\", "/")
+            i = str(PurePosixPath(i))
+            subfilename = i.replace(f'sdk/packs/{DPDKGlobal.DKBase.activePack}/', '')
+            fn = Filename(i)
+            fn.setBinary()
+            mf.addSubfile(subfilename, fn, 8)
+
+        mf.flush()
+        mf.close()
+        folder = abspath(f'sdk/built/{DPDKGlobal.DKBase.activePack}.rmdp')
+        subprocess.run(f'explorer /select, "{folder}"')
 
     def setupHomePage(self):
         # === Home Page ===
@@ -129,6 +159,7 @@ This is ALPHA software. Be sure to make regular backups of your Data Pack files.
         self.loadPack(None)
 
     def loadPack(self, _):
+        self.compileButton.Enable(1)
         for i in range(self.tabFrame.GetPageCount()):
             self.tabFrame.RemovePage(0)
         self.tabFrame.AddPage(self.cogEditorFrame, "Cog Appearances")
