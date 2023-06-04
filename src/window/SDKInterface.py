@@ -27,6 +27,7 @@ from .WxAppShell import *
 from .ViewPort import *
 from src.base import DPDKGlobal
 from ..datapack.DataPackManager import DataPackManager
+from ..ott.OTTUtil import toAlphaNumeric
 from ..pandaview.Cog import Cog
 from ..widgets.CogOverrideItem import CogOverrideItem
 from ..widgets.PackItem import PackItem
@@ -122,11 +123,9 @@ This is ALPHA software. Be sure to make regular backups of your Data Pack files.
         self.availPacksList.SetupScrolling()
 
         layout.Add(self.availPacksList)
-        self.newPackNameBox = wx.TextCtrl(self.homeFrame, size = self.FromDIP(wx.Size((200, 20))))
-        layout.Add(self.newPackNameBox)
 
         newPackButton = wx.Button(self.homeFrame, label = 'New Pack')
-        newPackButton.Bind(wx.EVT_BUTTON, self.loadPack)
+        newPackButton.Bind(wx.EVT_BUTTON, self.newPack)
         layout.Add(newPackButton)
         self.updatePackList()
 
@@ -153,6 +152,52 @@ This is ALPHA software. Be sure to make regular backups of your Data Pack files.
         for pack in self.packListItems:
             self.availPackLayout.Add(pack)
         self.availPacksList.SetupScrolling()
+
+    def newPack(self, _ = None):
+        dialog: wx.Dialog
+        with wx.Dialog(parent = self, title = 'Create a Datapack', style = wx.CAPTION) as dialog:
+            lpackfilename = wx.StaticText(dialog, label = 'Pack Filename')
+            packfilename = wx.TextCtrl(dialog)
+
+            def handlePackKeypress(event):
+                keycode = event.GetKeyCode()
+                if chr(keycode).isalnum() or keycode in (8, 95, 45, 32):
+                    event.Skip()
+
+            packfilename.Bind(wx.EVT_CHAR, handlePackKeypress)
+            lpackname = wx.StaticText(dialog, label = 'Pack Name')
+            packname = wx.TextCtrl(dialog)
+            packauthor = wx.TextCtrl(dialog)
+            lpackauthor = wx.StaticText(dialog, label = 'Pack Author')
+            createButton = wx.Button(dialog, id= wx.ID_OK, label = 'Create')
+            cancelButton = wx.Button(dialog, id = wx.ID_CANCEL, label = 'Cancel')
+
+            dialLayout = wx.BoxSizer(wx.VERTICAL)
+            dialLayout.AddMany((lpackfilename, packfilename, lpackname, packname, lpackauthor, packauthor, createButton, cancelButton))
+            dialog.SetSizer(dialLayout)
+
+            if dialog.ShowModal() == wx.ID_OK:
+                _packfn: str = packfilename.GetValue()
+                _packname: str = packname.GetValue()
+                _packauthor: str = packauthor.GetValue()
+                if any(x == '' for x in (_packfn, _packname, _packauthor)):
+                    wx.MessageBox('You must fill out all the available fields')
+                    self.newPack(None)
+                    return
+                if os.path.exists(f'sdk/packs/{_packfn}'):
+                    wx.MessageBox(f'A pack with this filename ({_packfn}) already exists')
+                    self.newPack(None)
+                    return
+                os.makedirs(f'sdk/packs/{_packfn}')
+                packinfo = {
+                    "pack_name": _packname,
+                    "pack_author": _packauthor,
+                    "datapacks_version": 100,
+                    "pack_identifier": f"{toAlphaNumeric(_packauthor.lower())}"
+                }
+                with open(f'sdk/packs/{_packfn}/pack.json', 'w') as info:
+                    json.dump(packinfo, info, indent = 4)
+                self.openPack(_packfn)
 
     def openPack(self, packPath: str):
         DPDKGlobal.DKBase.activePack = packPath

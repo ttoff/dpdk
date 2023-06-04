@@ -18,3 +18,12 @@ def sleep(duration: float):
         return task.cont
 
     return taskMgr.add(__task)
+
+
+def toAlphaNumeric(string: str) -> str:
+    finalstr: str = ''
+    for char in string:
+        if char.isalnum():
+            finalstr += char
+
+    return finalstr

@@ -54,9 +54,9 @@ class Cog(Actor):
 
         self.headParts: List[NodePath] = []
 
-        self.name: str = '#SuitColdCaller'
-        self.nameS: str = '#SuitColdCallerS'
-        self.nameP: str = '#SuitColdCallerP'
+        self.name: str = ''
+        self.nameS: str = ''
+        self.nameP: str = ''
 
         self.isSkeleton: bool = False
         self.isVirtual: bool = False
@@ -84,7 +84,7 @@ class Cog(Actor):
         self.adjustNametag()
 
     def adjustNametag(self):
-        self.nametagText.setText(f'{DataPackManager.getLocalizedText(self.name)}\nXXXXBot\nLevel 1')
+        self.nametagText.setText(f'{DataPackManager.getLocalizedText(self.name)}\nDeptBot\nLevel 1')
         # position & resize the panel
         x = (self.nametagText.getLeft() + self.nametagText.getRight()) / 2.0
         z = (self.nametagText.getTop() + self.nametagText.getBottom()) / 2.0
