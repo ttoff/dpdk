@@ -21,8 +21,6 @@ SKELECOG_MODELS = (
     'phase_5/models/char/cogB_robot-zero.bam',
     'phase_5/models/char/cogC_robot-zero.bam'
 )
-
-
 IDLE_ANIMS = (
     'phase_4/models/char/suitA-neutral.bam',
     'phase_4/models/char/suitB-neutral.bam',
@@ -150,12 +148,12 @@ class Cog(Actor):
         self.headParts = []
         self.updateCog()
 
-    def changeColor(self, r, g, b, a):
+    def changeColor(self, r: float, g: float, b: float, a: float):
         self.colorScale = VBase4(r, g, b, a)
         self.setColorScale(self.colorScale)
         self.updateCog()
 
-    def setHandColor(self, r, g, b, a):
+    def setHandColor(self, r: float, g: float, b: float, a: float):
         self.handColor = VBase4(r, g, b, a)
         self.find('**/hands').setColor(self.handColor)
         self.updateCog()

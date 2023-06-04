@@ -30,12 +30,6 @@ from ..widgets.CogOverrideItem import CogOverrideItem
 from ..widgets.PackItem import PackItem
 from ..widgets.HeadItem import HeadItem
 
-ID_FOUR_VIEW = 401
-ID_TOP_VIEW = 402
-ID_FRONT_VIEW = 403
-ID_LEFT_VIEW = 404
-ID_PERSP_VIEW = 405
-
 
 class WxPandaShell(WxAppShell):
     """ Class for Panda3D LevelEditor """
@@ -45,14 +39,6 @@ class WxPandaShell(WxAppShell):
     appname = 'Toontown Realms Data Pack Development Kit'
     copyright = ('Copyright 2023 Drewcification SW.' +
                  '\nAll Rights Reserved.')
-
-    MENU_TEXTS = {
-        ID_FOUR_VIEW: ("Four Views", None),
-        ID_TOP_VIEW: ("Top View", None),
-        ID_FRONT_VIEW: ("Front View", None),
-        ID_LEFT_VIEW: ("Left View", None),
-        ID_PERSP_VIEW: ("Persp View", None),
-    }
 
     def __init__(self):
         self.packListItems: List[PackItem] = []
@@ -65,13 +51,13 @@ class WxPandaShell(WxAppShell):
 
         self.initialize()
 
-    def createMenu(self):
-        self.menuView = wx.Menu()
-        self.menuBar.Insert(self.menuBar.GetMenuCount() - 1, self.menuView, "&View")
+        wx.MessageBox(
+            """Welcome to the Toontown Realms Data Pack Development Kit!
+        
+This is ALPHA software. Be sure to make regular backups of your Data Pack files. Most changes are applied automatically with no way to revert.""",
+            caption = "Notice")
 
     def createInterface(self):
-        self.createMenu()
-
         self.uiFontLarge = wx.Font(26, family = wx.FONTFAMILY_DEFAULT, style = 0, weight = 90)
         self.uiFontNormal = wx.Font(12, family = wx.FONTFAMILY_DEFAULT, style = 0, weight = 90)
         self.tabFrame = wx.Notebook(self)
@@ -233,11 +219,6 @@ class WxPandaShell(WxAppShell):
 
         previewRotationLabel = wx.StaticText(self.cogEditorTabBody, label = 'Preview Rotation')
         previewRotationLabel.SetFont(self.uiFontNormal)
-        #self.previewRotationSlider = KnobCtrl(self.cogEditorTabBody, size = (200, 200))
-        #self.previewRotationSlider.Bind(EVT_KC_ANGLE_CHANGED, self.__rotatePreview)
-        #self.previewRotationSlider.SetAngularRange(0, 360)
-        #self.previewRotationSlider.SetTags((0, 360))
-        #self.previewRotationSlider.SetValue(180)
         self.previewRotationSlider = wx.Slider(self.cogEditorTabBody,
                                                minValue = -180,
                                                maxValue = 180,
@@ -506,7 +487,6 @@ class WxPandaShell(WxAppShell):
                 filePaths.append(abspath(defaultCog))
         dialog: wx.SingleChoiceDialog
         with wx.SingleChoiceDialog(parent = self, caption = 'Choose a Cog', choices = cogs, message = 'Choose a default Cog to override') as dialog:
-
             if dialog.ShowModal() == wx.ID_OK:
                 path = filePaths[dialog.GetSelection()]
                 filename = os.path.basename(path)

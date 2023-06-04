@@ -99,9 +99,9 @@ class DPDKBase(WxPandaShell):
                     shutil.rmtree(file)
 
         path = self.settings.get('realms_client_directory')
-        for multifile in glob.glob(f'{path}resources\\default\\ttrm_mdl_*.pak') \
-                         + glob.glob(f'{path}resources\\default\\ttrm_tex_*.pak') \
-                         + glob.glob(f'{path}resources\\default\\ttrm_dat_*.pak'):
+        for multifile in (glob.glob(f'{path}resources\\default\\ttrm_mdl_*.pak')
+                          + glob.glob(f'{path}resources\\default\\ttrm_tex_*.pak')
+                          + glob.glob(f'{path}resources\\default\\ttrm_dat_*.pak')):
             self.notify.info(f'Extracting {multifile}')
             mf: Multifile = Multifile()
             mf.openRead(Filename(PurePosixPath(multifile)))
@@ -162,7 +162,8 @@ class DPDKBase(WxPandaShell):
         for key, val in OTPLocalizerEnglish.__dict__.items():
             self.localizer['#' + key] = val
 
-    def setupTextProperties(self):
+    @staticmethod
+    def setupTextProperties():
         tpm: TextPropertiesManager = TextPropertiesManager.getGlobalPtr()
         candidateActive = TextProperties()
         candidateActive.setTextColor(0, 0, 1, 1)
