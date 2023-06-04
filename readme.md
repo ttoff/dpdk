@@ -10,7 +10,7 @@ you can find one [here](https://www.panda3d.org/download/).
      1. [Clone it through GitHub by clicking here](x-github-client://openRepo/https://github.com/ttoff/dpdk) if you have [Github Desktop](https://desktop.github.com/)
      2. Running `git clone https://github.com/ttoff/dpdk.git` in your terminal in a new folder
      3. Pressing Download Zip (NOT recommended, as you will have to manually redownload each time there's an update)
-3. Open `run.cmd` and edit the `set PANDA_PATH=` to point to your Panda3D installation directory
+3. Open `run.cmd` in your text editor of choice and edit the `set PANDA_PATH=` to point to your Panda3D installation directory
 4. Run `run.cmd`
 
 ## Tutorial
