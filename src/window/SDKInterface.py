@@ -358,6 +358,14 @@ This is ALPHA software. Be sure to make regular backups of your Data Pack files.
         self.nameInput = wx.TextCtrl(self.cogEditorTabInfo, size = self.FromDIP(wx.Size(400, 25)))
         self.nameInput.Bind(wx.EVT_TEXT, self.__updateNames)
 
+        self.nameSLabel = wx.StaticText(self.cogEditorTabInfo, label = f'Name (Singular Form): "{DataPackManager.getLocalizedText(self.cogPreview.nameS)}"')
+        self.nameSInput = wx.TextCtrl(self.cogEditorTabInfo, size = self.FromDIP(wx.Size(400, 25)))
+        self.nameSInput.Bind(wx.EVT_TEXT, self.__updateNames)
+
+        self.namePLabel = wx.StaticText(self.cogEditorTabInfo, label = f'Name (Plural Form): "{DataPackManager.getLocalizedText(self.cogPreview.nameP)}"')
+        self.namePInput = wx.TextCtrl(self.cogEditorTabInfo, size = self.FromDIP(wx.Size(400, 25)))
+        self.namePInput.Bind(wx.EVT_TEXT, self.__updateNames)
+
         self.exitCogButton = wx.Button(
             self.cogEditorTabInfo, label = 'Back to Cog list'
         )
@@ -366,6 +374,10 @@ This is ALPHA software. Be sure to make regular backups of your Data Pack files.
         infoLayout.AddMany((
             self.nameLabel,
             self.nameInput,
+            self.nameSLabel,
+            self.nameSInput,
+            self.namePLabel,
+            self.namePInput,
             self.exitCogButton
         ))
         self.cogEditorTabInfo.SetSizer(infoLayout)
@@ -548,9 +560,13 @@ This is ALPHA software. Be sure to make regular backups of your Data Pack files.
         self.updateOverrides()
 
     def __updateNames(self, _):
-        name = self.nameInput.GetValue()
-        self.nameLabel.SetLabel(f'Name: "{DataPackManager.getLocalizedText(name)}"')
-        self.cogPreview.setName(name)
+        self.cogPreview.setName(self.nameInput.GetValue())
+        self.cogPreview.setNameSingular(self.nameSInput.GetValue())
+        self.cogPreview.setNamePlural(self.namePInput.GetValue())
+
+        self.nameLabel.SetLabel(f'Name: "{DataPackManager.getLocalizedText(self.cogPreview.name)}"')
+        self.nameSLabel.SetLabel(f'Name (Singular Form): "{DataPackManager.getLocalizedText(self.cogPreview.nameS)}"')
+        self.namePLabel.SetLabel(f'Name (Plural Form): "{DataPackManager.getLocalizedText(self.cogPreview.nameP)}"')
 
     def chooseNewOverride(self, _):
         cogs = []
@@ -610,6 +626,8 @@ This is ALPHA software. Be sure to make regular backups of your Data Pack files.
             self.__setBodyColor(*js.get('color_scale', (1, 1, 1, 1)))
 
             self.nameInput.SetValue(js.get('name'))
+            self.nameSInput.SetValue(js.get('name_singular'))
+            self.namePInput.SetValue(js.get('name_plural'))
             self.__updateNames(None)
 
             self.cogPreview.setQuoteSets(js.get('quote_sets', []))
