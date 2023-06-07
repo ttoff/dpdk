@@ -250,7 +250,7 @@ class Cog(Actor):
 
         for path, node, texture, pos, hpr, scale, colorScale, removeNodes in self.heads:
             jdict['head_models'].append({
-                'path': path,
+                'path': path.replace(r'\\', '/'),
                 'node': node,
                 'texture': texture.replace(r'\\', '/'),
                 'position': [*pos],
