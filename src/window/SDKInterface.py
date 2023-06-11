@@ -193,7 +193,7 @@ This is ALPHA software. Be sure to make regular backups of your Data Pack files.
                     "pack_name": _packname,
                     "pack_author": _packauthor,
                     "datapacks_version": 100,
-                    "pack_identifier": f"{toAlphaNumeric(_packauthor.lower())}"
+                    "pack_identifier": f"{toAlphaNumeric(_packauthor.lower())}:{toAlphaNumeric(_packname.lower())}"
                 }
                 with open(f'sdk/packs/{_packfn}/pack.json', 'w') as info:
                     json.dump(packinfo, info, indent = 4)
