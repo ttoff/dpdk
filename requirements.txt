@@ -1,4 +1,5 @@
 aiohttp
 attrdict
+requests
 toml
 wxpython
