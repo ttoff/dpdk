@@ -7,8 +7,12 @@ assignees: ''
 
 ---
 
-<!-- Before filling this out, read the following guidelines for submitting issues -->
+<!-- Before filling this out, read the following guidelines for submitting issues 
+ !! Failure to follow these guidelines will result in your issue being immediately closed
+ !! Repeatedly failing to follow these guidelines will result in your account being blocked from submitting issues !!-->
+
 <!-- 
+== GUIDELINES ==
 • Please do not copy and paste log outputs here.  Please upload them as a txt file attachment. 
 
 !!! DO NOT SUBMIT THE FOLLOWING !!!
