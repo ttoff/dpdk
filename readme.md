@@ -13,6 +13,8 @@ you can find one [here](https://www.panda3d.org/download/).
 3. Open `run.cmd` in your text editor of choice and edit the `set PANDA_PATH=` to point to your Panda3D installation directory
 4. Run `run.cmd`
 
+*Note: If you have an issue with the installation, you may need to download the Build Tools for Visual Studio 2022 from https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022*
+
 ## Tutorial
 
 * [Creating a Data Pack](#creating-a-data-pack)
