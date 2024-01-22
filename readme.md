@@ -3,8 +3,8 @@
 *Currently, this tool is only supported on Windows. It is possible to get it running on other OS's, but you will experience issues.*
 
 ## Installation
-1. First you will need the Realms Panda3D SDK. If you don't have it downloaded already,
-you can find it [here](https://toontownrealms.com/dev/Panda3D-TTRMDev-1.11.0-py3.6-x64.exe).
+1. First you will need a semi-recent version of Panda3D. If you don't have one downloaded already,
+you can find one [here](https://www.panda3d.org/download/).
 2. Clone this repository
    * You can do this by the following methods
      1. [Clone it through GitHub by clicking here](x-github-client://openRepo/https://github.com/ttoff/dpdk) if you have [Github Desktop](https://desktop.github.com/)
